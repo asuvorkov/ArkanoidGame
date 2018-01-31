@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/framework/framework.iml" filepath="$PROJECT_DIR$/framework/framework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/javafxBackend/javafxBackend.iml" filepath="$PROJECT_DIR$/javafxBackend/javafxBackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/klaus/klaus.iml" filepath="$PROJECT_DIR$/examples/klaus/klaus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gwtBackend/src/main/main.iml" filepath="$PROJECT_DIR$/gwtBackend/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/androidBackend/app/src/main/java/name/name.iml" filepath="$PROJECT_DIR$/androidBackend/app/src/main/java/name/name.iml" />
+      <module fileurl="file://$PROJECT_DIR$/swingBackend/swingBackend.iml" filepath="$PROJECT_DIR$/swingBackend/swingBackend.iml" />
+    </modules>
+  </component>
+</project>
