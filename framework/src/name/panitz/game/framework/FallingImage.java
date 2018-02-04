@@ -29,13 +29,13 @@ public class FallingImage<I> extends ImageObject<I> {
 	
 	public void left() {
 		if (!isJumping) {
-			getVelocity().x = -10;
+			getVelocity().x = -20;
 		}
 	}
 
 	public void right() {
 		if (!isJumping) {
-			getVelocity().x = +10;
+			getVelocity().x = +20;
 		}
 	}
 

@@ -14,6 +14,11 @@ import name.panitz.game.framework.*;
  * Created by Andrei on 02.02.2018.
  */
 public class Arkanoid<I, S> extends AbstractGame<I, S> {
+  private static final int VIEWPORT_WIDTH = 1250;
+  private static final int VIEWPORT_HEIGHT = 800;
+  private static final Vertex PLAYER_START = new Vertex(600,750);
+  private static final Vertex BALL_VELOCITY_START = new Vertex(10,-10);
+
   private List<BlockBlue<I>> blockBlues = new ArrayList<>();
   private List<BlockGreen<I>> blockGreens = new ArrayList<>();
   private List<BlockPurple<I>> blockPurples = new ArrayList<>();
@@ -22,7 +27,8 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
 
   private PlayerMedium<I> playerMedium;
   private List<Ball<I>> balls = new ArrayList<>();
-  private int lives = 4;
+  private int lives = 1;
+  private int score = 0;
 
   SoundObject<S> badBonusSound = new SoundObject<>("./Sounds/bad_bonus.wav");
   SoundObject<S> goodBonusSound = new SoundObject<>("./Sounds/good_bonus.wav");
@@ -45,11 +51,12 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
                         + " yyyyyyyyyyyyyyyyyyyyyyy ";
 
   public Arkanoid() {
-    super(new PlayerMedium<I>(new Vertex(600,750)), 1250, 800);
+    super(new PlayerMedium<I>(PLAYER_START), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     playerMedium = (PlayerMedium<I>) getPlayer();
     balls.add(new Ball<I> (new Vertex(getPlayer().getPos().x + 50, getPlayer().getPos().y - 15)));
-    balls.get(0).setVelocity(new Vertex(1, -1));
-    //background.add(new Background<I>(new Vertex(0, 0)));
+    balls.get(0).setVelocity(BALL_VELOCITY_START);
+    background.add(new Background<I>(new Vertex(0, 0)));
+    playSound(startGameSound);
 
     BufferedReader r = new BufferedReader(new StringReader(level1));
     int l = 0;
@@ -87,9 +94,8 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
       e.printStackTrace();
     }
 
-    getGOss().add(balls);
     getGOss().add(background);
-
+    getGOss().add(balls);
     getGOss().add(blockBlues);
     getGOss().add(blockGreens);
     getGOss().add(blockPurples);
@@ -104,12 +110,138 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
   public void paintTo(GraphicsTool<I> g) {
     super.paintTo(g);
     g.drawString(5, 20, "Lives: " + lives);
+    g.drawString(550, 20, "Score: " + score);
+    if (lives <= 0){
+      g.drawString(450, 300, 50, "Final score: " + score);
+      g.drawString(330, 400, 50, "You loosed, try one more time");
+    }
+    if (blockBlues.size() == 0 && blockGreens.size() == 0 && blockPurples.size() == 0
+        && blockReds.size() == 0 && blockYellows.size() == 0){
+      playSound(winSound);
+      g.drawString(450, 300, 50, "Final score: " + score);
+      g.drawString(600, 400, 50, "You won!");
+      g.drawString(450, 500, 50, "Donate to get new levels");
+    }
     g.setColor(0.9, 0.9, 0);
   }
 
   @Override
   public void doChecks() {
+    viewportCollision();
+    ballIsDown();
+    roundRestart();
+    ballPlayerCollision();
+    ballBlockCollision();
+  }
 
+  private void ballBlockCollision() {
+    for (Ball b: balls){
+
+      for (int i = 0; i < blockBlues.size(); i++){
+        if (b.touches(blockBlues.get(i))){
+          if (b.isLeftOf(blockBlues.get(i)) || b.isRightOf(blockBlues.get(i))){
+            b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+          }else {
+            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+          }
+          playSound(blockBreakSound);
+          blockBlues.remove(i);
+          score += 500;
+        }
+      }
+
+      for (int i = 0; i < blockGreens.size(); i++){
+        if (b.touches(blockGreens.get(i))){
+          if (b.isLeftOf(blockGreens.get(i)) || b.isRightOf(blockGreens.get(i))){
+            b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+          }else {
+            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+          }
+          playSound(blockBreakSound);
+          blockGreens.remove(i);
+          score += 400;
+        }
+      }
+
+      for (int i = 0; i < blockPurples.size(); i++){
+        if (b.touches(blockPurples.get(i))){
+          if (b.isLeftOf(blockPurples.get(i)) || b.isRightOf(blockPurples.get(i))){
+            b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+          }else {
+            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+          }
+          playSound(blockBreakSound);
+          blockPurples.remove(i);
+          score += 300;
+        }
+      }
+
+      for (int i = 0; i < blockReds.size(); i++){
+        if (b.touches(blockReds.get(i))){
+          if (b.isLeftOf(blockReds.get(i)) || b.isRightOf(blockReds.get(i))){
+            b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+          }else {
+            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+          }
+          playSound(blockBreakSound);
+          blockReds.remove(i);
+          score += 200;
+        }
+      }
+
+      for (int i = 0; i < blockYellows.size(); i++){
+        if (b.touches(blockYellows.get(i))){
+          if (b.isLeftOf(blockYellows.get(i)) || b.isRightOf(blockYellows.get(i))){
+            b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+          }else {
+            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+          }
+          playSound(blockBreakSound);
+          blockYellows.remove(i);
+          score += 100;
+        }
+      }
+    }
+  }
+
+  private void ballPlayerCollision() {
+    for (Ball b: balls){
+      if (b.touches(playerMedium)){
+        b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+      }
+    }
+  }
+
+  private void roundRestart() {
+    if (balls.size() <= 0 && lives > 0){
+      playerMedium.getPos().moveTo(PLAYER_START);
+      balls.add(new Ball<I> (new Vertex(getPlayer().getPos().x + 50, getPlayer().getPos().y - 15)));
+      balls.get(0).setVelocity(BALL_VELOCITY_START);
+    }
+  }
+
+  private void ballIsDown() {
+    for (int i = 0; i < balls.size(); i++){
+      if (balls.get(i).getPos().y + balls.get(i).getHeight() >= VIEWPORT_HEIGHT){
+        balls.remove(i);
+        if (balls.size() <= 0){
+          playSound(looseSound);
+          lives--;
+        }
+      }
+    }
+  }
+
+
+  private void viewportCollision() {
+    for (Ball b: balls){
+      if (b.getPos().x + b.getWidth() >= VIEWPORT_WIDTH || b.getPos().x <= 0){
+        b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+      }
+      if (b.getPos().y <= 0){
+        b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
+      }
+    }
   }
 
   @Override
