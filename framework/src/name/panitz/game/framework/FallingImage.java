@@ -12,7 +12,6 @@ public class FallingImage<I> extends ImageObject<I> {
 	}
 
 	public void stop() {
-		//getPos().move(getVelocity().mult(-1.1));
 		getVelocity().x = 0;
 		getVelocity().y = 0;
 		isJumping = false;
