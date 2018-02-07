@@ -36,6 +36,8 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
   private static final String BONUS_SCORE_X2 = "./Bonus/scoreX2.png";
   private static final String BONUS_SMALLER_PLATFORM = "./Bonus/smaller.png";
 
+  private boolean won = false;
+
   private Player<I> player;
   private List<Block<I>> blocks = new ArrayList<>();
   private List<Ball<I>> balls = new ArrayList<>();
@@ -56,13 +58,13 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
   private static final int GRID_WIDTH = 50;
   private static final int GRID_HEIGHT = 25;
   private String level1 = "                         \n"
-                        + "                         \n"
-                        + "                         \n"
-                        + " bbbbbbbbbbbbbbbbbbbbbbb \n"
-                        + " ggggggggggggggggggggggg \n"
-                        + " ppppppppppppppppppppppp \n"
-                        + " rrrrrrrrrrrrrrrrrrrrrrr \n"
-                        + " yyyyyyyyyyyyyyyyyyyyyyy ";
+      + "                         \n"
+      + "                         \n"
+      + " bbbbbbbbbbbbbbbbbbbbbbb \n"
+      + " ggggggggggggggggggggggg \n"
+      + " ppppppppppppppppppppppp \n"
+      + " rrrrrrrrrrrrrrrrrrrrrrr \n"
+      + " yyyyyyyyyyyyyyyyyyyyyyy ";
 
   Arkanoid() {
     super(new Player<I>(PLAYER_START, PLAYER_M_IMAGE), VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
@@ -122,8 +124,11 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
       g.drawString(330, 400, 50, "You loosed, try one more time");
     }
     if (blocks.size() == 0){
-      playSound(winSound);
-      g.drawString(450, 300, 50, "Final score: " + score);
+      if (!won){
+        playSound(winSound);
+        won = true;
+      }
+      g.drawString(450, 300, 50, "Final score: " + score + lives * 10000);
       g.drawString(600, 400, 50, "You won!");
       g.drawString(450, 500, 50, "Donate to get new levels");
     }
@@ -183,12 +188,11 @@ public class Arkanoid<I, S> extends AbstractGame<I, S> {
     for (Ball b: balls){
       for (int i = 0; i < blocks.size(); i++){
         if (b.touches(blocks.get(i))){
-          if ((b.getPos().y < blocks.get(i).getPos().y || b.getPos().y > blocks.get(i).getPos().y) &&
-                  (b.getPos().x + b.getWidth() > blocks.get(i).getPos().x ||
-                  b.getPos().x < blocks.get(i).getPos().x + blocks.get(i).getWidth())){
-            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
-          }else {
+          if (b.getPos().y + b.getHeight() == blocks.get(i).getPos().y
+              || b.getPos().y == blocks.get(i).getPos().y + blocks.get(i).getHeight()){
             b.setVelocity(new Vertex(b.getVelocity().x * (-1), b.getVelocity().y));
+          }else {
+            b.setVelocity(new Vertex(b.getVelocity().x, b.getVelocity().y * (-1)));
           }
           playSound(blockBreakSound);
 
